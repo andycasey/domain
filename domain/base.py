@@ -66,7 +66,7 @@ class BaseDomainClient(object):
             "demographics": "api_demographics_read",
             "disclaimers": "api_properties_read",
             "listings": "api_listings_read",
-            "properties": "api_listings_read",
+            "properties": "api_properties_read",
             "propertyReports": "api_propertyreports_read",
             "salesResults": "api_salesresults_read",
             "suburbPerformanceStatistics": "api_suburbperformance_read"
