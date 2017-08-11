@@ -2,93 +2,114 @@
 
 import logging
 import os
-import requests
-from time import time
 
-from . import __version__
+from .plans import (AgentListingsPlan, PropertyLocationsPlan)
 
 __all__ = ["BaseDomainClient"]
 
 
-class Token(object):
-    def __init__(self, access_token, expires_in, token_type):
-        self._access_token = access_token
-        self._expires_in = expires_in
-        self._token_type = token_type
-        self._expires_at = time() + expires_in
-
-    @property
-    def expired(self):
-        return time() >= self._expires_at
-
-    def __repr__(self):
-        return "{} {}".format(self._token_type, self._access_token)
-
-
-
 class BaseDomainClient(object):
 
-    def __init__(self, client_id=None, client_secret=None):
+    _API_URL = "https://api.domain.com.au"
+    _API_VERSION = 1
+    
+
+    def __init__(self, auth_property=None, auth_agent=None):
         r"""
         Initialize a BaseDomainClient.
-
-        :param client_id: [optional]
-            The `client_id` to use to authorise this application with the Domain
-            Property API. If `None` is supplied then the value will be read from
-            the `DOMAIN_LISTINGS_API_KEY` environment variable.
-
-        :param client_secret: [optional]
-            The `client_secret` to use to authorise this application with the
-            Domain Property API. If `None` is supplied then the value will be
-            read from the `DOMAIN_LISTINGS_API_SECRET` environment variable.
         """
 
-        # Take the client_id/client_secret or default to an environment variable
-        self._authorization_params = (
-            client_id or os.environ.get("DOMAIN_LISTINGS_API_KEY"),
-            client_secret or os.environ.get("DOMAIN_LISTINGS_API_SECRET")
-        )
-        if None in self._authorization_params:
-            logging.warn("Incomplete authorization parameters.")
+        if auth_property is None:
+            auth_property = (
+                os.environ.get("API_DOMAIN_PROPERTY_CLIENT_ID"),
+                os.environ.get("API_DOMAIN_PROPERTY_CLIENT_SECRET")
+            )
 
-        self._session = None
-        self._token = None
+        if auth_agent is None:
+            auth_agent = (
+                os.environ.get("API_DOMAIN_AGENT_CLIENT_ID"),
+                os.environ.get("API_DOMAIN_AGENT_CLIENT_SECRET")
+            )
+
+        self._auth = {
+            PropertyLocationsPlan: auth_property,
+            AgentListingsPlan: auth_agent
+        }
+
+        for k, v in self._auth.items():
+            if None not in v: break
+        else:
+            # No break
+            logging.warn("No API credentials found!")
+
+        self._tokens = []
+
         return None
 
 
     @property
-    def token(self):
-        r"""
-        Return a current bearer token from the Domain API.
-        """
-
-        # Check for an unexpired token.
-        if self._token is None or self._token.expired:
-            r = requests.post(
-                    "https://auth.domain.com.au/v1/connect/token",
-                    auth=self._authorization_params,
-                    data={
-                        "grant_type": "client_credentials",
-                        "scope": "api_listings_read"
-                    }
-                )
-
-            if not r.ok:
-                r.raise_for_status()
-
-            self._token = Token(**r.json())
-
-        return self._token
+    def tokens(self):
+        return self._tokens
 
 
-    @property
-    def session(self):
+    def _scope_required(self, end_point):
 
-        if self._session is None:
-            self._session = requests.session()
-            self._session.headers.update({
-                "Authorization": self.token,
-                "User-Agent": "get-rich/{}".format(__version__),
-                "Content-Type": "application/json"
-            })
-        return self._session
+        # Get top-level endpoint.
+        reference_point = end_point.lstrip("/").split("/")[0]
+
+        # What scope is required for this reference point?
+        reference_point_scopes = {
+            "addressLocators": "api_addresslocators_read",
+            "agencies": "api_agencies_read",
+            "agents": "api_agencies_read",
+            "me": "api_agencies_read",
+            "demographics": "api_demographics_read",
+            "disclaimers": "api_properties_read",
+            "listings": "api_listings_read",
+            "properties": "api_listings_read",
+            "propertyReports": "api_propertyreports_read",
+            "salesResults": "api_salesresults_read",
+            "suburbPerformanceStatistics": "api_suburbperformance_read"
+        }
+
+        scope = reference_point_scopes.get(reference_point, None)
+        if scope is None:
+            raise ValueError("no API scope recognised for end point {}".format(
+                reference_point))
+        return scope
+
+
+    def _api_url(self, end_point):
+        return "{}/v{}/{}".format(self._API_URL, self._API_VERSION, end_point)
+
+
+    def _prepare_request(self, end_point):
+
+        scope = self._scope_required(end_point)
+
+        # Do we have a token with this scope already?
+        for token in self.tokens:
+            if scope in token.scopes: break
+        else:
+            # What plan has this scope?
+            for plan, credentials in self._auth.items():
+                if scope in plan.available_scopes:
+                    self._tokens.append(plan(credentials[0], credentials[1], scope))
+                    token = self._tokens[-1]
+                    break
+            else:
+                raise ValueError("no plans available with required scope")
+
+        return (token.session, self._api_url(end_point))
+
+
+    def _api_request(self, end_point, **kwargs):
+        
+        session, url = self._prepare_request(end_point)
+
+        r = session.get(url, **kwargs)
+        if not r.ok:
+            r.raise_for_session()
+        return r
+
+
