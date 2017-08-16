@@ -5,7 +5,6 @@ import os
 
 from .packages import (AgentsListingsPackage, PropertyLocationPackage, permissions)
 
-
 __all__ = ["BaseDomainClient"]
 
 class BaseDomainClient(object):
@@ -15,7 +14,7 @@ class BaseDomainClient(object):
     _API_URL = "https://api.domain.com.au"
     _API_VERSION = 1
     
-    def __init__(self, auth_property=None, auth_agent=None):
+    def __init__(self, auth_property=None, auth_agent=None, limit_scopes=False):
         r"""
         Initialize a client for the Domain API.
 
@@ -32,6 +31,12 @@ class BaseDomainClient(object):
             then the client ID and secret will be read from the
             `API_DOMAIN_AGENT_CLIENT_ID` and `API_DOMAIN_AGENT_CLIENT_SECRET`
             environment variables.
+
+        :param limit_scopes: [optional]
+            Restrict the API scopes only to what is needed for a request, rather
+            than creating tokens with all available scopes for the given package.
+            Subsequent API requests may be faster if `limit_scopes` is `False`
+            (default: False).
         """
 
         if auth_property is None:
@@ -57,14 +62,15 @@ class BaseDomainClient(object):
             # No break
             logging.warn("No API credentials found!")
 
-        self._tokens = []
+        self._packages = []
+        self._limit_scopes = limit_scopes
         return None
 
 
     @property
-    def tokens(self):
-        """ Return the existing authenticated tokens for this client. """
-        return self._tokens
+    def packages(self):
+        """ Return the existing authenticated packages for this client. """
+        return self._packages
 
 
     def _api_url(self, end_point):
@@ -86,23 +92,26 @@ class BaseDomainClient(object):
             The relative URL of the API end point.
         """
 
-        scope, accessible_plans = permissions(end_point)
+        scope, packages = permissions(end_point)
+
+        # What scope level will we request?
+        req_scope = scope if self._limit_scopes else None           
 
         # Do we have a token for an accessible plan with this scope already?
-        for token in self.tokens:
-            if scope in token.scopes and isinstance(plan, accessible_plans):
+        for package in self.packages:
+            if scope in package.scopes and isinstance(package, packages):
                 break
         else:
             # Need to create a new token.
             for plan, credentials in self._auth.items():
-                if scope in plan.available_scopes and plan in accessible_plans:
-                    token = plan(credentials[0], credentials[1], scope)
-                    self._tokens.append(token)
+                if scope in plan.available_scopes and plan in packages:
+                    package = plan(credentials[0], credentials[1], req_scope)
+                    self._packages.append(package)
                     break
             else:
-                raise ValueError("no plans available with required scope")
+                raise ValueError("no packages available with required scope")
 
-        return (token.session, self._api_url(end_point))
+        return (package.session, self._api_url(end_point))
 
 
     def _api_request(self, end_point, **kwargs):

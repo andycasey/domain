@@ -4,7 +4,6 @@ from .base import BasePackage
 
 __all__ = ["PropertyLocationPackage", "PropertyLocationBusinessPackage"]
 
-
 class PropertyLocationPackage(BasePackage):
 
     """ 
@@ -13,15 +12,7 @@ class PropertyLocationPackage(BasePackage):
     See https://developer.domain.com.au/docs/read/Packages for details.
     """
 
-    available_scopes = (
-        "api_addresslocators_read",
-        "api_demographics_read",
-        "api_properties_read",
-        "api_listings_read",
-        #"api_propertyreports_read"
-        "api_salesresults_read",
-        "api_suburbperformance_read"
-    )
+    available_scopes = ("api_properties_read", "api_salesresults_read")
 
 
 class PropertyLocationBusinessPackage(PropertyLocationPackage):
@@ -33,4 +24,5 @@ class PropertyLocationBusinessPackage(PropertyLocationPackage):
     See https://developer.domain.com.au/docs/read/Packages for details.
     """
 
-    pass
+    available_scopes = ("api_properties_read", "api_salesresults_read",
+        "api_propertyreports_read", "api_suburbperformance_read")

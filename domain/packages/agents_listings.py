@@ -13,11 +13,7 @@ class AgentsListingsPackage(BasePackage):
     See https://developer.domain.com.au/docs/read/Packages for details.
     """
 
-    available_scopes = (
-        "api_agencies_read",
-        "api_listings_read",
-        #"api_propertyreports_read",
-    )
+    available_scopes = ("api_agencies_read", "api_listings_read")
 
 
 class AgentsListingsBusinessPackage(AgentsListingsPackage):
@@ -29,10 +25,5 @@ class AgentsListingsBusinessPackage(AgentsListingsPackage):
     See https://developer.domain.com.au/docs/read/Packages for details.
     """
 
-    available_scopes = (
-        "api_agencies_read",
-        "api_listings_read",
-        #"api_propertyreports_read",
-    )
-
-    pass
+    available_scopes = ("api_agencies_read", "api_listings_read",
+        "api_propertyreports_read")

@@ -8,7 +8,6 @@ from collections import OrderedDict
 from .agents_listings import *
 from .property_location import *
 
-
 # See https://developer.domain.com.au/docs/read/Reference for details
 
 # TODO: Unclear what plan is required for /propertyReports
@@ -16,7 +15,8 @@ from .property_location import *
 _REQUIRED_PLANS = [
     ("addressLocators", (PropertyLocationBusinessPackage, )),
     ("agencies", (AgentsListingsPackage, )),
-    ("me\/agencies", (PropertyLocationBusinessPackage, AgentsListingsBusinessPackage)),
+    ("me\/agencies", 
+            (PropertyLocationBusinessPackage, AgentsListingsBusinessPackage)),
     ("agents", (AgentsListingsPackage, )),
     ("demographics", (PropertyLocationBusinessPackage, )),
     ("disclaimers", (PropertyLocationBusinessPackage, )),
@@ -25,8 +25,10 @@ _REQUIRED_PLANS = [
     ("listings\/commercial", (AgentsListingsPackage, )),
     ("listings", (AgentsListingsPackage, )),
     ("properties", (PropertyLocationPackage, AgentsListingsBusinessPackage)),
-    ("properties\/.s+\/priceEstimate", (PropertyLocationBusinessPackage, AgentsListingsBusinessPackage)),
-    ("properties\/_suggest", (PropertyLocationPackage, AgentsListingsBusinessPackage)),
+    ("properties\/.s+\/priceEstimate", 
+        (PropertyLocationBusinessPackage, AgentsListingsBusinessPackage)),
+    ("properties\/_suggest", 
+        (PropertyLocationPackage, AgentsListingsBusinessPackage)),
     ("salesResults", (PropertyLocationPackage, )),
     ("suburbPerformanceStatistics", (PropertyLocationBusinessPackage, )),        
 ]
@@ -44,7 +46,6 @@ _REQUIRED_SCOPES = {
     "salesResults": "api_salesresults_read",
     "suburbPerformanceStatistics": "api_suburbperformance_read"
 }
-
 
 def permissions(api_end_point):
     r"""
