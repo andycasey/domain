@@ -3,9 +3,9 @@
 import requests
 from time import time
 
-__all__ = ["PropertyLocationsPackage", "AgentListingsPackage"]
+__all__ = ["BasePackage"]
 
-class BaseAPIPackage(object):
+class BasePackage(object):
 
     """ A base object for a Domain API package. """
 
@@ -13,7 +13,7 @@ class BaseAPIPackage(object):
 
     def __init__(self, client_id, client_secret, scopes=None):
         r"""
-        Initialize a BaseAPIPackage. 
+        Initialize a BasePackage. 
 
         See https://developer.domain.com.au/docs/read/Packages for details on
         available API packages through the Domain API.
@@ -83,37 +83,3 @@ class BaseAPIPackage(object):
                 "Content-Type": "application/json"
             })
         return self._session
-
-
-class PropertyLocationsPackage(BaseAPIPackage):
-
-    """ 
-    An object to make API requests using the free 'Property and Locations' package.
-
-    See https://developer.domain.com.au/docs/read/Packages for details.
-    """
-
-    available_scopes = (
-        "api_addresslocators_read",
-        "api_demographics_read",
-        "api_properties_read",
-        "api_listings_read",
-        #"api_propertyreports_read"
-        "api_salesresults_read",
-        "api_suburbperformance_read"
-    )
-
-
-class AgentListingsPackage(BaseAPIPackage):
-
-    """ 
-    An object to make API requests using the free 'Agents and Listings' package.
-
-    See https://developer.domain.com.au/docs/read/Packages for details.
-    """
-
-    available_scopes = (
-        "api_agencies_read",
-        "api_listings_read",
-        #"api_propertyreports_read",
-    )

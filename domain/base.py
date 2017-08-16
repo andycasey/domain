@@ -3,7 +3,8 @@
 import logging
 import os
 
-from .packages import (AgentListingsPackage, PropertyLocationsPackage)
+from .packages import (AgentsListingsPackage, PropertyLocationPackage, permissions)
+
 
 __all__ = ["BaseDomainClient"]
 
@@ -46,8 +47,8 @@ class BaseDomainClient(object):
             )
 
         self._auth = {
-            AgentListingsPackage: auth_agent,
-            PropertyLocationsPackage: auth_property
+            AgentsListingsPackage: auth_agent,
+            PropertyLocationPackage: auth_property
         }
 
         for k, v in self._auth.items():
@@ -64,36 +65,6 @@ class BaseDomainClient(object):
     def tokens(self):
         """ Return the existing authenticated tokens for this client. """
         return self._tokens
-
-
-    def _scope_required(self, end_point):
-        r"""
-        Return the API scope that is required for a given end point.
-
-        :param end_point:
-            The relative URL of the API end point.
-        """
-
-        reference_point = end_point.lstrip("/").split("/")[0]
-        reference_point_scopes = {
-            "addressLocators": "api_addresslocators_read",
-            "agencies": "api_agencies_read",
-            "agents": "api_agencies_read",
-            "me": "api_agencies_read",
-            "demographics": "api_demographics_read",
-            "disclaimers": "api_properties_read",
-            "listings": "api_listings_read",
-            "properties": "api_properties_read",
-            "propertyReports": "api_propertyreports_read",
-            "salesResults": "api_salesresults_read",
-            "suburbPerformanceStatistics": "api_suburbperformance_read"
-        }
-
-        scope = reference_point_scopes.get(reference_point, None)
-        if scope is None:
-            raise ValueError("no API scope recognised for end point {}".format(
-                reference_point))
-        return scope
 
 
     def _api_url(self, end_point):
@@ -115,17 +86,18 @@ class BaseDomainClient(object):
             The relative URL of the API end point.
         """
 
-        scope = self._scope_required(end_point)
+        scope, accessible_plans = permissions(end_point)
 
-        # Do we have a token with this scope already?
+        # Do we have a token for an accessible plan with this scope already?
         for token in self.tokens:
-            if scope in token.scopes: break
+            if scope in token.scopes and isinstance(plan, accessible_plans):
+                break
         else:
-            # What plan has this scope?
-            for plan, creds in self._auth.items():
-                if scope in plan.available_scopes:
-                    self._tokens.append(plan(creds[0], creds[1], scope))
-                    token = self._tokens[-1]
+            # Need to create a new token.
+            for plan, credentials in self._auth.items():
+                if scope in plan.available_scopes and plan in accessible_plans:
+                    token = plan(credentials[0], credentials[1], scope)
+                    self._tokens.append(token)
                     break
             else:
                 raise ValueError("no plans available with required scope")
