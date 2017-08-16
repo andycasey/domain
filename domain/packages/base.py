@@ -36,12 +36,8 @@ class BasePackage(object):
         r = requests.post(
             "https://auth.domain.com.au/v1/connect/token",
             auth=(client_id, client_secret),
-            data={
-                "grant_type": "client_credentials",
-                "scope": " ".join(scopes)
-            }
-        )
-
+            data=dict(grant_type="client_credentials", scope=" ".join(scopes)))
+        
         if not r.ok:
             r.raise_for_status()
 

@@ -12,7 +12,7 @@ class DomainClient(BaseDomainClient):
     @property
     def sales_results_metadata(self):
         r""" Retrieve metadata regarding sales result data. """
-        return self._api_request("salesResults/_head").json()
+        return self._api_request("salesResults/_head")
 
 
     def sales_results(self, city):
@@ -24,7 +24,7 @@ class DomainClient(BaseDomainClient):
             Adelaide, Brisbane, Canberra, Melbourne, Sydney.
         """
         city = utils.validate_city(city)
-        return self._api_request("salesResults/{}".format(city)).json()
+        return self._api_request("salesResults/{}".format(city))
 
 
     def sales_results_listings(self, city):
@@ -36,7 +36,7 @@ class DomainClient(BaseDomainClient):
             Adelaide, Brisbane, Canberra, Melbourne, Sydney.
         """
         city = utils.validate_city(city)
-        return self._api_request("salesResults/{}/listings".format(city)).json()
+        return self._api_request("salesResults/{}/listings".format(city))
 
 
     def listing(self, listing_id):
@@ -46,7 +46,7 @@ class DomainClient(BaseDomainClient):
         :param listing_id:
             The listing identifier. 
         """
-        return self._api_request("listings/{:.0f}".format(int(listing_id))).json()
+        return self._api_request("listings/{:.0f}".format(int(listing_id)))
 
 
     def property(self, property_id):
@@ -56,7 +56,7 @@ class DomainClient(BaseDomainClient):
         :param property_id:
             The property identifier.
         """
-        return self._api_request("properties/{}".format(property_id)).json()
+        return self._api_request("properties/{}".format(property_id))
 
 
     def properties(self, search_terms, limit=15, channel="all"):
@@ -80,7 +80,7 @@ class DomainClient(BaseDomainClient):
 
         channel = utils.validate_channel(channel)
         return self._api_request("properties/_suggest", params=dict(
-            terms=search_terms, pageSize=limit, channel=channel)).json()
+            terms=search_terms, pageSize=limit, channel=channel))
 
 
     def agencies(self, search_terms, page_number=1, page_size=20):
@@ -97,4 +97,4 @@ class DomainClient(BaseDomainClient):
             The page size for paginated results (max: 500, default: 20).
         """
         return self._api_request("agencies", params=dict(q=search_terms,
-            pageNumber=int(page_number), pageSize=int(page_size))).json()
+            pageNumber=int(page_number), pageSize=int(page_size)))

@@ -4,10 +4,10 @@
 
 Don't ask.
 
-# API client example
+## API client example
 
 ````python
-from domain.client import DomainClient
+from domain import DomainClient
 
 domain = DomainClient()
 

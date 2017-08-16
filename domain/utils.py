@@ -4,6 +4,29 @@
 
 __all__ = ["validate_channel", "validate_city"]
 
+
+def _validate_shorthand(entry, options):
+    r"""
+    Validate the input entry from a list of options.
+
+    :param entry:
+        A string.
+
+    :param options:
+        A list of acceptable string entries.
+    """
+
+    entry = entry.strip().lower()
+
+    for option in options:
+        if option.lower().strip().startswith(entry):
+            # TODO deal with ambiguity
+            return option
+
+    raise ValueError("unsupported option: {} (available: {})".format(
+        entry, ", ".join(options)))
+
+
 def validate_channel(channel):
     r"""
     Validate the input for property channel.
@@ -12,15 +35,7 @@ def validate_channel(channel):
         The property channel. Supported channels include: all, commercial, and
         residential.
     """
-
-    channel = channel.strip().lower()
-    supported_channels = ("all", "commercial", "residential")
-    for supported_channel in supported_channels:
-        if supported_channel.startswith(channel):
-            return supported_channel
-
-    raise ValueError("unsupported channel: {} (supported: {})".format(
-        channel, ", ".join(supported_channels)))
+    return _validate_shorthand(channel, ("all", "commercial", "residential"))
 
 
 def validate_city(city):
@@ -31,14 +46,5 @@ def validate_city(city):
         An Australian city. Supported cities include: Adelaide, Brisbane,
         Canberra, Melbourne, and Sydney.
     """
-
-    city = city.strip().title()
-    supported_cities = \
-        ("Adelaide", "Brisbane", "Canberra", "Melbourne", "Sydney")
-
-    for supported_city in supported_cities:
-        if supported_city.startswith(city):
-            return supported_city
-
-    raise ValueError("unsupported city: {} (supported cities are: {})".format(
-            city, ", ".join(supported_cities)))
+    return _validate_shorthand(city, 
+        ("Adelaide", "Brisbane", "Canberra", "Melbourne", "Sydney"))

@@ -2,8 +2,10 @@
 
 import logging
 import os
+from collections import OrderedDict
 
-from .packages import (AgentsListingsPackage, PropertyLocationPackage, permissions)
+from .packages import (AgentsListingsPackage, AgentsListingsBusinessPackage,
+    PropertyLocationPackage, PropertyLocationBusinessPackage, permissions)
 
 __all__ = ["BaseDomainClient"]
 
@@ -22,13 +24,13 @@ class BaseDomainClient(object):
             A two-length tuple containing a client ID and secret for a 'Property
             and Locations' package on the Domain API. If `None` is specified, 
             then the client ID and secret will be read from the 
-            `API_DOMAIN_PROPERTY_CLIENT_ID` and the `API_DOMAIN_PROPERTY_CLIENT_SECRET`
+            `API_DOMAIN_PROPERTY_CLIENT_ID` and `API_DOMAIN_PROPERTY_CLIENT_SECRET`
             environment variables.
 
         :param auth_agent: [optional]
-            A two-length tuple containing a client ID and secret for the
-            'Agents and Listings' package on the Domain API. If `None` is specified
-            then the client ID and secret will be read from the
+            A two-length tuple containing a client ID and secret for an 'Agents 
+            and Listings' package on the Domain API. If `None` is specified then 
+            the client ID and secret will be read from the
             `API_DOMAIN_AGENT_CLIENT_ID` and `API_DOMAIN_AGENT_CLIENT_SECRET`
             environment variables.
 
@@ -51,11 +53,13 @@ class BaseDomainClient(object):
                 os.environ.get("API_DOMAIN_AGENT_CLIENT_SECRET")
             )
 
-        self._auth = {
-            AgentsListingsPackage: auth_agent,
-            PropertyLocationPackage: auth_property
-        }
-
+        self._auth = OrderedDict([
+            (AgentsListingsPackage, auth_agent),
+            (PropertyLocationPackage, auth_property),
+            (AgentsListingsBusinessPackage, auth_agent),
+            (PropertyLocationBusinessPackage, auth_property)
+        ])
+        
         for k, v in self._auth.items():
             if None not in v: break
         else:
@@ -128,4 +132,4 @@ class BaseDomainClient(object):
         r = session.get(url, **kwargs)
         if not r.ok:
             r.raise_for_status()
-        return r
+        return r.json()
