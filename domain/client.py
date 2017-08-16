@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
+from . import utils
 from .base import BaseDomainClient
 
+__all__ = ["DomainClient"]
 
+class DomainClient(BaseDomainClient):
 
-class Client(BaseDomainClient):
+    """ A client for the Domain API. """
 
     @property
     def sales_results_metadata(self):
-        r"""
-        Retrieve metadata regarding sales result data.
-        """
+        r""" Retrieve metadata regarding sales result data. """
         return self._api_request("salesResults/_head").json()
 
 
@@ -22,7 +23,7 @@ class Client(BaseDomainClient):
             City to retrieve sales results for. Supported cities are:
             Adelaide, Brisbane, Canberra, Melbourne, Sydney.
         """
-        city = _validate_city(city)
+        city = utils.validate_city(city)
         return self._api_request("salesResults/{}".format(city)).json()
 
 
@@ -34,8 +35,7 @@ class Client(BaseDomainClient):
             City to retrieve listing summaries for. Supported cities are:
             Adelaide, Brisbane, Canberra, Melbourne, Sydney.
         """
-
-        city = _validate_city(city)
+        city = utils.validate_city(city)
         return self._api_request("salesResults/{}/listings".format(city)).json()
 
 
@@ -44,11 +44,10 @@ class Client(BaseDomainClient):
         Retrieve a specific property listing.
 
         :param listing_id:
-            Listing identifier.
+            The listing identifier. 
         """
-
         return self._api_request("listings/{:.0f}".format(int(listing_id))).json()
-        
+
 
     def property(self, property_id):
         r"""
@@ -57,7 +56,6 @@ class Client(BaseDomainClient):
         :param property_id:
             The property identifier.
         """
-
         return self._api_request("properties/{}".format(property_id)).json()
 
 
@@ -80,36 +78,23 @@ class Client(BaseDomainClient):
         if 1 > limit:
             raise ValueError("limit must be a positive integer")
 
-        channel = _validate_channel(channel)
-
+        channel = utils.validate_channel(channel)
         return self._api_request("properties/_suggest", params=dict(
             terms=search_terms, pageSize=limit, channel=channel)).json()
 
 
+    def agencies(self, search_terms, page_number=1, page_size=20):
+        r"""
+        Return a summary of agencies matching the specified criteria.
 
+        :param search_terms:
+            The terms to search for.
 
+        :param page_number: [optional]
+            The page number for paginated results (default: 1).
 
-def _validate_channel(channel):
-    channel = channel.strip().title()
-    supported_channels = ("all", "commercial", "residential")
-    for supported_channel in supported_channels:
-        if supported_channel.startswith(channel):
-            return supported_channel
-
-    raise ValueError("unsupported channel: {} (supported: {})".format(
-        channel, ", ".join(supported_channel)))
-
-
-def _validate_city(city):
-
-    city = city.strip().title()
-    supported_cities = \
-        ("Adelaide", "Brisbane", "Canberra", "Melbourne", "Sydney")
-
-    for supported_city in supported_cities:
-        if supported_city.startswith(city):
-            return supported_city
-
-    raise ValueError("unsupported city: {} (supported cities are: {})"\
-        .format(city, ", ".join(supported_cities)))
-
+        :param page_size: [optional]
+            The page size for paginated results (max: 500, default: 20).
+        """
+        return self._api_request("agencies", params=dict(q=search_terms,
+            pageNumber=int(page_number), pageSize=int(page_size))).json()

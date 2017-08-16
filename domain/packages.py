@@ -3,14 +3,31 @@
 import requests
 from time import time
 
-__all__ = ["PropertyLocationsPlan", "AgentListingsPlan"]
+__all__ = ["PropertyLocationsPackage", "AgentListingsPackage"]
 
+class BaseAPIPackage(object):
 
-class BaseAPIPlan(object):
+    """ A base object for a Domain API package. """
 
     available_scopes = ()
 
     def __init__(self, client_id, client_secret, scopes=None):
+        r"""
+        Initialize a BaseAPIPackage. 
+
+        See https://developer.domain.com.au/docs/read/Packages for details on
+        available API packages through the Domain API.
+
+        :param client_id:
+            A valid client ID for a package to access the Domain API.
+
+        :param client_secret:
+            A valid client secret for a package to access the Domain API.
+
+        :param scopes: [optional]
+            The API scopes requested. If `None` is selected, then all available
+            scopes will be requested at the authentication step.
+        """
 
         scopes = scopes or self.available_scopes
         if isinstance(scopes, str):
@@ -37,16 +54,19 @@ class BaseAPIPlan(object):
 
     @property
     def scopes(self):
+        """ Return the authorized scopes for this API package. """
         return self._scopes
 
 
     @property
     def has_token_expired(self):
+        """ Return whether this API token has expired or not. """
         return time() >= self._created + self._access_token["expires_in"]
 
 
     @property
     def token(self):
+        """ Return an authorised API token as a header string. """
         return "{} {}".format(
             self._access_token["token_type"],
             self._access_token["access_token"]
@@ -55,6 +75,7 @@ class BaseAPIPlan(object):
 
     @property
     def session(self):
+        """ Return an session that is authorised for this API package. """
         if self._session is None:
             self._session = requests.session()
             self._session.headers.update({
@@ -64,8 +85,13 @@ class BaseAPIPlan(object):
         return self._session
 
 
+class PropertyLocationsPackage(BaseAPIPackage):
 
-class PropertyLocationsPlan(BaseAPIPlan):
+    """ 
+    An object to make API requests using the free 'Property and Locations' package.
+
+    See https://developer.domain.com.au/docs/read/Packages for details.
+    """
 
     available_scopes = (
         "api_addresslocators_read",
@@ -78,8 +104,13 @@ class PropertyLocationsPlan(BaseAPIPlan):
     )
 
 
+class AgentListingsPackage(BaseAPIPackage):
 
-class AgentListingsPlan(BaseAPIPlan):
+    """ 
+    An object to make API requests using the free 'Agents and Listings' package.
+
+    See https://developer.domain.com.au/docs/read/Packages for details.
+    """
 
     available_scopes = (
         "api_agencies_read",
