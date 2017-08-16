@@ -59,9 +59,9 @@ class BasePackage(object):
 
 
     @property
-    def has_token_expired(self):
-        """ Return whether this API token has expired or not. """
-        return time() >= self._created + self._access_token["expires_in"]
+    def is_token_valid(self):
+        """ Return whether this API token is still valid or not. """
+        return self._created + self._access_token["expires_in"] >= time()
 
 
     @property

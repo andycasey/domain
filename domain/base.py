@@ -99,7 +99,8 @@ class BaseDomainClient(object):
 
         # Do we have a token for an accessible plan with this scope already?
         for package in self.packages:
-            if scope in package.scopes and isinstance(package, packages):
+            if scope in package.scopes and isinstance(package, packages) \
+            and package.is_token_valid:
                 break
         else:
             # Need to create a new token.
