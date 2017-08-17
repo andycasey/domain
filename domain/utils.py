@@ -18,13 +18,21 @@ def _validate_shorthand(entry, options):
 
     entry = entry.strip().lower()
 
+    matches = []
     for option in options:
         if option.lower().strip().startswith(entry):
-            # TODO deal with ambiguity
-            return option
+            matches.append(option)
 
-    raise ValueError("unsupported option: {} (available: {})".format(
-        entry, ", ".join(options)))
+    if len(matches) == 0:
+        raise ValueError("unsupported option: {} (available: {})".format(entry,
+            ", ".join(options)))
+
+    elif len(matches) == 1:
+        return matches[0]
+
+    else:
+        raise ValueError("multiple matches found for '{}': {} (from: {})".format(
+            entry, ", ".join(matches), ", ".join(options)))
 
 
 def validate_channel(channel):
