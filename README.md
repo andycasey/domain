@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/andycasey/get-rich-or-die-trying.svg?branch=master)](https://travis-ci.org/andycasey/get-rich-or-die-trying)
+[![Docs](https://readthedocs.org/projects/get-rich-or-die-tryin/badge/?version=latest)](http://get-rich-or-die-tryin.readthedocs.io/en/latest/)
 
 # Get Rich or Die Tryin'
 
