@@ -1,0 +1,5 @@
+.gitignore
+env.sh
+*.pyc
+docs/build/
+notebooks/.ipynb_checkpoints/
