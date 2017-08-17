@@ -10,4 +10,5 @@ Client for Domain API
    :maxdepth: 2
    :caption: Contents:
 
-
+   client
+   packages
