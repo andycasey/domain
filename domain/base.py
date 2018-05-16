@@ -2,7 +2,9 @@
 
 import logging
 import os
-from collections import OrderedDict
+from time import (sleep, time)
+
+from collections import (deque, OrderedDict)
 
 from .packages import (AgentsListingsPackage, AgentsListingsBusinessPackage,
     PropertyLocationPackage, PropertyLocationBusinessPackage, permissions)
@@ -16,7 +18,8 @@ class BaseDomainClient(object):
     _API_URL = "https://api.domain.com.au"
     _API_VERSION = 1
     
-    def __init__(self, auth_property=None, auth_agent=None, limit_scopes=False):
+    def __init__(self, auth_property=None, auth_agent=None, limit_scopes=False,
+        throttle_rate=2):
         r"""
         Initialize a client for the Domain API.
 
@@ -39,6 +42,12 @@ class BaseDomainClient(object):
             than creating tokens with all available scopes for the given package.
             Subsequent API requests may be faster if `limit_scopes` is `False`
             (default: False).
+
+        :param throttle_rate: [optional]
+            Automatically throttle API requests to stay within Domain limits.
+            The throttle rate is the maximum number of API calls allowed per
+            second. If the throttle rate is a non-positive value then no API
+            throttling will occur.
         """
 
         if auth_property is None:
@@ -68,6 +77,8 @@ class BaseDomainClient(object):
 
         self._packages = []
         self._limit_scopes = limit_scopes
+        self._throttle_times = deque()
+        self._throttle_rate = int(throttle_rate)
         return None
 
 
@@ -128,6 +139,15 @@ class BaseDomainClient(object):
         """
 
         session, url = self._prepare_request(end_point)
+
+        # Throttle API calls so Domain doesn't cut us off.
+        if self._throttle_rate > 0:
+            while len(self._throttle_times) > self._throttle_rate \
+              and (time() - self._throttle_times[-self._throttle_rate]) < 1:
+                self._throttle_times.popleft()
+                sleep(1) 
+
+            self._throttle_times.append(time())
 
         r = session.get(url, **kwargs)
         if not r.ok:

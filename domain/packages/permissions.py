@@ -3,7 +3,6 @@
 """ Manage package and scope permissions for API end points. """
 
 import re
-from collections import OrderedDict
 
 from .agents_listings import *
 from .property_location import *
