@@ -1,6 +1,6 @@
 
 import sys
-from setuptools import setup, find_packages
+from setuptools import setup
 from codecs import open
 from os import system
 
@@ -31,7 +31,7 @@ setup(
         "Programming Language :: Python :: 3.6",
     ],
     keywords="domain api client",
-    packages=find_packages(exclude=["tests"]),
+    packages=["domain", "domain.packages"],
     install_requires=["requests"],
     extras_require={
         "test": ["coverage"]
