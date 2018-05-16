@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from . import utils
+from . import validate, utils
 from .base import BaseDomainClient
 
 __all__ = ["DomainClient"]
@@ -47,6 +47,70 @@ class DomainClient(BaseDomainClient):
             The listing identifier. 
         """
         return self._api_request("listings/{:.0f}".format(int(listing_id)))
+
+
+    def residential_listings(self, listing_type=None, property_types=None,
+        property_features=None, listing_attributes=None, bedrooms=None,
+        bathrooms=None, car_spaces=None, price_range=None, land_area_range=None,
+        locations=None, location_terms=None, keywords=None, inspections=None, 
+        auction=None, sort_by=None, sort_ascending=True, page=None, 
+        page_size=None, **kwargs):
+        r"""
+        Retrieves residential listings matching the specified criteria. Search
+        results are limited to the first 1000 results (by the Domain API).
+
+        If the number of results is greater, the intention is to refine the 
+        search by adding more restrictive parameters, to find a relevant set of 
+        results.
+        """
+
+        listing_type = validate.listing_type(listing_type)
+        property_types = validate.property_types(property_types)
+        listing_attributes = validate.listing_attributes(listing_attributes)
+
+        min_bedrooms, max_bedrooms = validate.integer_range(bedrooms)
+        min_bathrooms, max_bathrooms = validate.integer_range(bathrooms)
+        min_car_spaces, max_car_spaces = validate.integer_range(car_spaces, "")
+        min_price, max_price = validate.integer_range(price_range, "")
+        min_land_area, max_land_area = validate.integer_range(land_area_range, "")
+
+        #advertiser_ids = validate.advertiser_ids(advertiser_ids)
+
+        locations = [dict(state="VIC", suburb="Richmond", postCode="3121",
+            includeSurroundingSuburbs=False)]
+
+
+        # locations
+        #location_tmers
+        # keywords
+        # inspections
+        # auction
+        # sort_by
+        # sort_ascending
+        # page
+        # page_size
+
+
+        data = dict(
+            listingType=listing_type,
+            propertyTypes=property_types,
+            listingAttributes=listing_attributes,
+            minBedrooms=min_bedrooms,
+            maxBedrooms=max_bedrooms,
+            minBathrooms=min_bathrooms,
+            maxBathrooms=max_bathrooms,
+            minCarspaces=min_car_spaces,
+            maxCarspaces=max_car_spaces,
+            minPrice=min_price,
+            maxPrice=max_price,
+            minLandArea=min_land_area,
+            maxLandArea=max_land_area,
+            #advertiserIds=advertiser_ids,
+            locations=locations
+            )
+        return self._post_api_request("listings/residential/_search", data=data)
+
+
 
 
     def property(self, property_id):

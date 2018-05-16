@@ -133,3 +133,20 @@ class BaseDomainClient(object):
         if not r.ok:
             r.raise_for_status()
         return r.json()
+
+
+
+    def _post_api_request(self, end_point, **kwargs):
+        r"""
+        Execute an API request to the Domain API.
+
+        :param end_point:
+            The relative URL of the API end point.
+        """
+
+        session, url = self._prepare_request(end_point)
+
+        r = session.post(url, **kwargs)
+        if not r.ok:
+            r.raise_for_status()
+        return r.json()
