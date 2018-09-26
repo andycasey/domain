@@ -2,6 +2,7 @@
 
 import logging
 import os
+import yaml
 from time import (sleep, time)
 
 from collections import (deque, OrderedDict)
@@ -9,93 +10,51 @@ from collections import (deque, OrderedDict)
 from .packages import (AgentsListingsPackage, AgentsListingsBusinessPackage,
     PropertyLocationPackage, PropertyLocationBusinessPackage, permissions)
 
+from .authorisations import ClientCredentials
+
 __all__ = ["BaseDomainClient"]
 
 class BaseDomainClient(object):
 
     """ A base object to access the Domain client API. """
 
-    _API_URL = "https://api.domain.com.au"
-    _API_VERSION = 1
-    
-    def __init__(self, auth_property=None, auth_agent=None, limit_scopes=False,
-        throttle_rate=2):
+    def __init__(self, credentials_path, **kwargs):
         r"""
-        Initialize a client for the Domain API.
-
-        :param auth_property: [optional]
-            A two-length tuple containing a client ID and secret for a 'Property
-            and Locations' package on the Domain API. If `None` is specified, 
-            then the client ID and secret will be read from the 
-            `API_DOMAIN_PROPERTY_CLIENT_ID` and `API_DOMAIN_PROPERTY_CLIENT_SECRET`
-            environment variables.
-
-        :param auth_agent: [optional]
-            A two-length tuple containing a client ID and secret for an 'Agents 
-            and Listings' package on the Domain API. If `None` is specified then 
-            the client ID and secret will be read from the
-            `API_DOMAIN_AGENT_CLIENT_ID` and `API_DOMAIN_AGENT_CLIENT_SECRET`
-            environment variables.
-
-        :param limit_scopes: [optional]
-            Restrict the API scopes only to what is needed for a request, rather
-            than creating tokens with all available scopes for the given package.
-            Subsequent API requests may be faster if `limit_scopes` is `False`
-            (default: False).
-
-        :param throttle_rate: [optional]
-            Automatically throttle API requests to stay within Domain limits.
-            The throttle rate is the maximum number of API calls allowed per
-            second. If the throttle rate is a non-positive value then no API
-            throttling will occur.
+        Initialize a client with the Domain API.
         """
 
-        if auth_property is None:
-            auth_property = (
-                os.environ.get("API_DOMAIN_PROPERTY_CLIENT_ID"),
-                os.environ.get("API_DOMAIN_PROPERTY_CLIENT_SECRET")
-            )
+        # Load the credentials.
+        with open(credentials_path, "r") as fp:
+            contents = yaml.load(fp)
 
-        if auth_agent is None:
-            auth_agent = (
-                os.environ.get("API_DOMAIN_AGENT_CLIENT_ID"),
-                os.environ.get("API_DOMAIN_AGENT_CLIENT_SECRET")
-            )
+        self._credentials = [ClientCredentials(**entry) for entry in contents]
 
-        self._auth = OrderedDict([
-            (AgentsListingsPackage, auth_agent),
-            (PropertyLocationPackage, auth_property),
-            (AgentsListingsBusinessPackage, auth_agent),
-            (PropertyLocationBusinessPackage, auth_property)
-        ])
-        
-        for k, v in self._auth.items():
-            if None not in v: break
-        else:
-            # No break
+        if len(self._credentials) < 1:
             logging.warn("No API credentials found!")
 
-        self._packages = []
-        self._limit_scopes = limit_scopes
-        self._throttle_times = deque()
-        self._throttle_rate = int(throttle_rate)
         return None
 
 
-    @property
-    def packages(self):
-        """ Return the existing authenticated packages for this client. """
-        return self._packages
-
-
-    def _api_url(self, end_point):
+    def _api_url(self, end_point, scheme=None):
         r"""
         Return the complete URL for the given API end point.
 
         :param end_point:
             The relative URL of the API end point.
+
+        :param scheme: [optional]
+            The scheme to use when constructing the API URL. If None is given
+            then the first available scheme will be used.
         """
-        return "{}/v{}/{}".format(self._API_URL, self._API_VERSION, end_point)
+        if scheme is None:
+            scheme = self._API_SCHEMES[0]
+
+        elif scheme not in self._API_SCHEMES:
+            raise ValueError(f"API scheme '{scheme}' not recognised")
+
+        host, version = self._API_HOST, self._API_VERSION
+
+        return f"{scheme}://{host}/{version}/{end_point}"
 
 
     def _prepare_request(self, end_point):
@@ -130,7 +89,7 @@ class BaseDomainClient(object):
         return (package.session, self._api_url(end_point))
 
 
-    def _api_request(self, end_point, **kwargs):
+    def _api_request(self, end_point, token, **kwargs):
         r"""
         Execute an API request to the Domain API.
 
@@ -140,33 +99,11 @@ class BaseDomainClient(object):
 
         session, url = self._prepare_request(end_point)
 
-        # Throttle API calls so Domain doesn't cut us off.
-        if self._throttle_rate > 0:
-            while len(self._throttle_times) > self._throttle_rate \
-              and (time() - self._throttle_times[-self._throttle_rate]) < 1:
-                self._throttle_times.popleft()
-                sleep(1) 
-
-            self._throttle_times.append(time())
+        # Throttle based on package used.
+        raise a
 
         r = session.get(url, **kwargs)
         if not r.ok:
             r.raise_for_status()
         return r.json()
 
-
-
-    def _post_api_request(self, end_point, **kwargs):
-        r"""
-        Execute an API request to the Domain API.
-
-        :param end_point:
-            The relative URL of the API end point.
-        """
-
-        session, url = self._prepare_request(end_point)
-
-        r = session.post(url, **kwargs)
-        if not r.ok:
-            r.raise_for_status()
-        return r.json()
