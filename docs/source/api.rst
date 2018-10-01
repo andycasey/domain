@@ -1,5 +1,5 @@
-Client
-******
+API
+***
 
 .. automodule:: domain.client
 
