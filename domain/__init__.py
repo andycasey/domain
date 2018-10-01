@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from . import packages
 from .client import DomainClient
 
-__version__ = 0.01
+__version__ = 0.1

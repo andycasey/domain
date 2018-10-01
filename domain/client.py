@@ -52,12 +52,12 @@ class DomainClient(base.BaseDomainClient):
         search_level = validate.case_insensitive_string(search_level,
                                                         ("Address", "Suburb"))
 
-        data = dict(search_level=search_level, unit_number=unit_number, 
-                    street_number=street_number, street_name=street_name, 
-                    street_type=street_type, suburb=suburb, state=state, 
-                    postcode=postcode)
+        params = dict(search_level=search_level, unit_number=unit_number, 
+                      street_number=street_number, street_name=street_name, 
+                      street_type=street_type, suburb=suburb, state=state, 
+                      postcode=postcode)
 
-        return self._api_request(f"addressLocators", data, **kwargs)
+        return self._api_request(f"addressLocators", params=params, **kwargs)
     
 
     @authorisation.requires_scope("api_agencies_read")
@@ -107,10 +107,13 @@ class DomainClient(base.BaseDomainClient):
         listingStatusFilter = validate.case_insensitive_string(
             listingStatusFilter, ("live", "liveAndArchived"))
 
-        data = dict(listingStatusFilter=listingStatusFilter, 
-                    date_updated_since=date_updated_since, 
-                    page_number=page_number, page_size=page_size)
-        return self._api_request(f"agencies/{id}/listings", data, **kwargs)
+        params = dict(listingStatusFilter=listingStatusFilter, 
+                      date_updated_since=date_updated_since, 
+                      page_number=page_number, 
+                      page_size=page_size)
+
+        return self._api_request(f"agencies/{id}/listings", params=params, 
+                                 **kwargs)
     
 
     @authorisation.requires_scope("api_agencies_read")
@@ -140,8 +143,9 @@ class DomainClient(base.BaseDomainClient):
                                                    ("residential", "commercial"),
                                                    default="residential")
 
-        data = dict(channel=channel)
-        return self._api_request(f"agencies/{id}/subscriptions", data, **kwargs)
+        return self._api_request(f"agencies/{id}/subscriptions", 
+                                 params=dict(channel=channel),
+                                 **kwargs)
     
 
     @authorisation.requires_scope("api_agencies_read")
@@ -156,7 +160,7 @@ class DomainClient(base.BaseDomainClient):
     
 
     @authorisation.requires_scope("api_agencies_read")
-    def agencies(self, query, page_number=None, page_size=None, **kwargs):
+    def agencies_search(self, query, page_number=None, page_size=None, **kwargs):
         r"""
         Retrieves summary of agencies matching the specified criteria.
         
@@ -170,8 +174,8 @@ class DomainClient(base.BaseDomainClient):
             Page size for paginated results.
         """
 
-        data = dict(query=query, page_number=page_number, page_size=page_size)
-        return self._api_request(f"agencies", data, **kwargs)
+        params = dict(query=query, page_number=page_number, page_size=page_size)
+        return self._api_request(f"agencies", params=params, **kwargs)
     
 
     @authorisation.requires_scope("api_agencies_read")
@@ -195,8 +199,8 @@ class DomainClient(base.BaseDomainClient):
         # TODO: Some reason the page_size here is max to 20, but not elsewhere?
         # TODO: method parameters: `query` vs `q`
 
-        data = dict(query=query, page_number=page_number, page_size=page_size)
-        return self._api_request(f"agents/search", data, **kwargs)
+        params = dict(query=query, page_number=page_number, page_size=page_size)
+        return self._api_request(f"agents/search", params=params, **kwargs)
     
 
     @authorisation.requires_scope("api_agencies_read")
@@ -234,10 +238,10 @@ class DomainClient(base.BaseDomainClient):
             Page size for paginated results.
         """
 
-        data = dict(date_updated_since=date_updated_since, 
-                    includedArchivedListings=includedArchivedListings, 
-                    page_number=page_number, page_size=page_size)
-        return self._api_request(f"agents/{id}/listings", data, **kwargs)
+        params = dict(date_updated_since=date_updated_since, 
+                      includedArchivedListings=includedArchivedListings, 
+                      page_number=page_number, page_size=page_size)
+        return self._api_request(f"agents/{id}/listings", params=params, **kwargs)
     
 
     @authorisation.requires_scope("api_demographics_read")
@@ -292,8 +296,8 @@ class DomainClient(base.BaseDomainClient):
             ]
             types = [validate.case_insensitive_string(_, available) for _ in types]
 
-        data = dict(level=level, id=id, types=types, year=year)
-        return self._api_request(f"demographics", data, **kwargs)
+        params = dict(level=level, id=id, types=types, year=year)
+        return self._api_request(f"demographics", params=params, **kwargs)
     
 
     @authorisation.requires_scope("api_properties_read")
@@ -306,8 +310,7 @@ class DomainClient(base.BaseDomainClient):
         """
 
         # TODO: What kind of disclaimers?! What if we give None.
-        data = dict(ids=ids)
-        return self._api_request(f"disclaimers", data, **kwargs)
+        return self._api_request(f"disclaimers", params=dict(ids=ids), **kwargs)
     
 
     @authorisation.requires_scope("api_properties_read")
@@ -337,8 +340,8 @@ class DomainClient(base.BaseDomainClient):
     
 
     @authorisation.requires_scope("api_enquiries_read", "api_enquiries_write")
-    def enquiries(self, agency_id=None, agent_id=None, date_from=None, 
-                  date_to=None, page_number=None, **kwargs):
+    def enquiries_search(self, agency_id=None, agent_id=None, date_from=None, 
+                         date_to=None, page_number=None, **kwargs):
         r"""
         Searches enquiries based on agents or agencies.
         
@@ -359,10 +362,10 @@ class DomainClient(base.BaseDomainClient):
         """
         # TODO: why is there no page_size here?!
         # TODO: Why is page_number max 25 here but not everywhere?
-        data = dict(agency_id=agency_id, agent_id=agent_id, 
-                    date_from=date_from, date_to=date_to, 
-                    page_number=page_number)
-        return self._api_request(f"enquiries", data, **kwargs)
+        params = dict(agency_id=agency_id, agent_id=agent_id, 
+                      date_from=date_from, date_to=date_to, 
+                      page_number=page_number)
+        return self._api_request(f"enquiries", params=params, **kwargs)
     
 
     @authorisation.requires_scope("api_listings_read", "api_listings_write")
@@ -389,8 +392,9 @@ class DomainClient(base.BaseDomainClient):
         """
         # TODO: Why is page_number max 25 here but not everywhere?
 
-        data = dict(page_number=page_number)
-        return self._api_request(f"listings/{id}/enquiries", data, **kwargs)
+        return self._api_request(f"listings/{id}/enquiries", 
+                                 params=dict(page_number=page_number),
+                                 **kwargs)
     
 
     @authorisation.requires_scope("api_listings_read")
@@ -409,8 +413,9 @@ class DomainClient(base.BaseDomainClient):
         time_period = validate.case_insensitive_string(
             time_period, ("last7Days", "last90Days", "wholeCampaign"))
 
-        data = dict(time_period=time_period)
-        return self._api_request(f"listings/{id}/statistics", data, **kwargs)
+        return self._api_request(f"listings/{id}/statistics", 
+                                 dict(time_period=time_period),
+                                 **kwargs)
     
 
     @authorisation.requires_scope("api_listings_read")
@@ -441,10 +446,10 @@ class DomainClient(base.BaseDomainClient):
         time_period = validate.case_insensitive_string(
             time_period, ("last7Days", "last90Days", "wholeCampaign"))
 
-        data = dict(agent_id=agent_id, 
-                    time_period=time_period, status_filter=status_filter,
-                    page_number=page_number, page_size=page_size)
-        return self._api_request(f"listings/statistics", data, **kwargs)
+        params = dict(agent_id=agent_id, 
+                      time_period=time_period, status_filter=status_filter,
+                      page_number=page_number, page_size=page_size)
+        return self._api_request(f"listings/statistics", params=params, **kwargs)
     
 
     @authorisation.requires_scope("api_listings_read")
@@ -458,8 +463,10 @@ class DomainClient(base.BaseDomainClient):
         :param provider_ad_id: 
             External provider advertisement identifier.
         """
-        data = dict(agency_id=agency_id, provider_ad_id=provider_ad_id)
-        return self._api_request(f"listings/processingReports", data, **kwargs)
+        params = dict(agency_id=agency_id, provider_ad_id=provider_ad_id)
+        return self._api_request(f"listings/processingReports", 
+                                 params=params, 
+                                 **kwargs)
     
 
     @authorisation.requires_scope("api_listings_read")
@@ -492,7 +499,7 @@ class DomainClient(base.BaseDomainClient):
         """
         # TODO: the docstring and documentation for this method is not clear.
         data = dict(terms=terms)
-        return self._api_request(f"listings/locations", data, **kwargs)
+        return self._api_request(f"listings/locations", params=data, **kwargs)
     
 
     @property
@@ -550,7 +557,7 @@ class DomainClient(base.BaseDomainClient):
         """
         data = dict(agency_id=agency_id, 
                     page_number=page_number, page_size=page_size)
-        return self._api_request(f"projects", data, **kwargs)
+        return self._api_request(f"projects", params=data, **kwargs)
     
 
     @authorisation.requires_scope("api_properties_read")
@@ -612,7 +619,7 @@ class DomainClient(base.BaseDomainClient):
         channel = validate.case_insensitive_string(
             channel, ("All", "Residential", "Commercial"))
         data = dict(terms=terms, page_size=page_size, channel=channel)
-        return self._api_request(f"properties/_suggest", data, **kwargs)
+        return self._api_request(f"properties/_suggest", params=data, **kwargs)
     
 
     @authorisation.requires_scope("api_propertyreports_read")
@@ -681,7 +688,7 @@ class DomainClient(base.BaseDomainClient):
                     bedrooms=bedrooms, bathrooms=bathrooms, parking=parking, 
                     prepared_for=prepared_for, product_code=product_code)
 
-        return self._api_request(f"propertyReports", data, **kwargs)
+        return self._api_request(f"propertyReports", params=data, **kwargs)
     
 
     @authorisation.requires_scope("api_salesresults_read")
@@ -739,7 +746,7 @@ class DomainClient(base.BaseDomainClient):
         """
         # TODO: Update docs with better specifications of coordinates.
         data = dict(coordinate=coordinate)
-        return self._api_request(f"locations/schools", data, **kwargs)
+        return self._api_request(f"locations/schools", params=data, **kwargs)
     
 
     @authorisation.requires_scope("api_webhooks_write")
@@ -824,7 +831,7 @@ class DomainClient(base.BaseDomainClient):
                        chronological_span=chronological_span, 
                        tPlusFrom=tPlusFrom, tPlusTo=tPlusTo, 
                        bedrooms=bedrooms, values=values)
-        return self._api_request(f"suburbPerformanceStatistics", data, **kwargs)
+        return self._api_request(f"suburbPerformanceStatistics", params=data, **kwargs)
     
 
     @authorisation.requires_scope("api_webhooks_write")
@@ -844,5 +851,5 @@ class DomainClient(base.BaseDomainClient):
         """
         # TODO: Swagger has no docs for page_number or page_size.
         data = dict(page_number=page_number, page_size=page_size)
-        return self._api_request(f"webhooks/{id}/subscriptions", data, **kwargs)
+        return self._api_request(f"webhooks/{id}/subscriptions", params=data, **kwargs)
     
