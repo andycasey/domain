@@ -1,70 +1,51 @@
 
-from collections import deque
-from time import (sleep, time) # yea it is
-
-from .packages import (scopes, throttle_rates)
-
+import requests
+from .scopes import package_plan_scopes
+from .token import Token
 
 class AuthorisationGrant(object):
 
-    def __init__(self, client_id, client_secret, package=None, 
-                 throttle_rate=None):
+    def __init__(self, client, client_id, client_secret, package_and_plan=None):
 
-        self._client_id = client_id
-        self._client_secret = client_secret
-        self.package = package
-        # TODO: Validate package.
-        #       If we need to discover package, log a warning.
-
-        # Automagically handle throttling.
-        if throttle_rate is None:
-            throttle_rate = throttle_rates[self.package]
-
-        self._api_call_times = deque()
-        self._api_throttle_rate = int(throttle_rate)
+        self._auth = (client_id, client_secret)
+        self.client = client
+        self.package_and_plan = package_and_plan
+        return None
 
 
-    def discover_package(self):
+    def discover_package_and_plan(self):
         r"""
         Discover which package is associated with this authorisation.
         """
-        raise NotImplementedError("nope")
-
-
-    @property
-    def token_headers(self):
-        r""" Return the authorization token for Domain. """
-
-        # If necessary, throttle this request so Domain does not kill us.
-        if self._api_throttle_rate > 0:
-            while len(self._api_call_times) > self._api_throttle_rate \
-            and (time() - self._api_call_times[-self._api_throttle_rate]) < 1:
-                self._api_call_times.popleft()
-                sleep(1) 
-
-        self._api_call_times.append(time())
-
-        return dict([
-            ("Authorization", f"{self.token}"),
-            ("Content-Type", "application/json"),
-        ])
-
-
+        raise NotImplementedError
 
 
     @property
     def token(self):
-        # do we have a token.
+        token = getattr(self, "_token", None)
+        if token is None or token.expired:
+            self._token = self.create_token()
 
-        # if not, create one with full scope.
-
-        raise a
-
-
-    @property
-    def scopes(self):
-        return scopes[self.package]
+        return self._token
 
 
-    def has_scope(self, scope):
-        return scope in self.scopes
+    def create_token(self, scopes=None):
+
+        if scopes is None:
+            scopes = package_plan_scopes[self.package_and_plan]
+
+        r = requests.post(
+            self.client._auth_uri("connect/token"),
+            auth=self._auth,
+            data=dict(
+                grant_type="client_credentials",
+                scope=" ".join(scopes)))
+
+        if not r.ok:
+            r.raise_for_status()
+
+        kwds = dict(scopes=scopes)
+        kwds.update(r.json())
+
+        return Token(**kwds)
+

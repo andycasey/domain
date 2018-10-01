@@ -11,3 +11,6 @@ domain.egg-info/
 
 .DS_Store
 
+*.yaml
+
+withdrawn.md

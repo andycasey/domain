@@ -23,15 +23,15 @@ setup(
     version=domain.__version__,
     author="Andrew R. Casey",
     author_email="andycasey@gmail.com",
-    description="Domain API client",
+    description="API clients for property (Domain, CoreLogic)",
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.6",
     ],
-    keywords="domain api client",
-    packages=["domain", "domain.packages"],
+    keywords="domain corelogic api client",
+    packages=["domain", "domain.packages", "corelogic"],
     install_requires=["requests"],
     extras_require={
         "test": ["coverage"]
