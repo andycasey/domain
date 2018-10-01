@@ -17,7 +17,6 @@ class DomainClient(BaseClient):
 
 """
 
-
 def parse_path_params(parameters):
 
     path_keys = []
@@ -81,7 +80,7 @@ def autogen_method_code(path, method_kwds):
     description = method_kwds.get("description", "")
 
     scopes = ", ".join([f'"{scope}"' for scope in method_kwds["security"][0]["oauth2"]])
-    raise a
+
     autogen_code = f'''
     @requires_scope({scopes})
     def {method_name}(self, {method_parameters_str}):
@@ -99,7 +98,6 @@ def autogen_method_code(path, method_kwds):
     '''
 
     return autogen_code
-
 
 
 
@@ -128,9 +126,6 @@ def autogen(adapter_documentation_uri):
 
 if __name__ == "__main__":
 
-
+    # Automatically generate client-side Python code based on the public Swagger adapter.
     code = autogen("https://dev.domain.com.au/static/docs/media/public-adapter-v1.json")
-
-
-
 

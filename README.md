@@ -1,8 +1,9 @@
-[![Build Status](https://travis-ci.org/andycasey/domain.svg?branch=master)](https://travis-ci.org/andycasey/domaing)
+[![Build Status](https://travis-ci.org/andycasey/domain.svg?branch=master)](https://travis-ci.org/andycasey/domain)
 [![Docs](https://readthedocs.org/projects/domain/badge/?version=latest)](http://domain.readthedocs.io/en/latest/)
 
 # Python client for the Domain property API 
 
+It does what it says on the tin.
 
 # Installation
 
@@ -21,7 +22,7 @@ python setup.py install
 ````
 
 
-## Authenticating 
+# Authentication 
 
 You will first need to [sign up for a Domain developer account](https://developer.domain.com.au/).
 Then you will be able to [create an application](https://developer.domain.com.au/applications) and get a Client ID and Client Secret. 
@@ -57,7 +58,9 @@ from domain import DomainClient
 dc = DomainClient("client_credentials.yaml")
 ````
 
-That's it! The `DomainClient` will work out which scope is required for each API
+That's it! 
+
+The `DomainClient` will work out which scope is required for each API
 end point, and will create authentication tokens (Oauth2) as needed. New tokens
 will be generated when the old ones expire, and the token handling
 (`domain.authorisations.token.Token`) will automatically throttle your requests
@@ -67,12 +70,11 @@ You can override this behaviour by supplying your own `token=Token` keyword
 argument to any API method in the `DomainClient` class.
 
 
-## API Example.
-
+# API Example Usage
 
 ````python
 # Suggest properties based on search terms
-results = domain.properties_suggest("Mockingbird lane")
+results = dc.properties_suggest("Mockingbird lane")
 
 print(results[0])
 >>> {u'id': u'PB-5682-MC',
@@ -89,13 +91,13 @@ print(results[0])
 
 
 # General sales metadata.
-print(domain.sales_results_metadata())
+print(dc.sales_results_metadata())
 >>> {u'auctionedDate': u'2017-08-12',
  u'lastModifiedDateTime': u'2017-08-12T08:45:37.576Z'}
 
 
 # Check recent sales results in the best city ever.
-print(domain.sales_results("Melbourne"))
+print(dc.sales_results("Melbourne"))
 >>> {u'adjClearanceRate': 0.717219589257504,
  u'median': 898000,
  u'numberAuctioned': 623,
