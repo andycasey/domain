@@ -28,11 +28,11 @@ You will first need to [sign up for a Domain developer account](https://develope
 Then you will be able to [create an application](https://developer.domain.com.au/applications) and get a Client ID and Client Secret. 
 These will be used for authentication.
 
-Note that the Domain API has multiple Packages and Plans that give access to
-different end points of their API. You can sign up for the 
-"Agents and Listings - Innovation Plan" and the
-"Property and Location - Innovation Plan" for free.
-Each package/plan combination will grant you a different Client ID and Client
+Note that the Domain API has multiple [Packages and Plans](https://developer.domain.com.au/docs/packages-and-plans) 
+that give access to different end points of their API. You can sign up for the 
+- "Agents and Listings - Innovation Plan", and the
+- "Property and Location - Innovation Plan" 
+for free. Each package/plan combination will grant you a different Client ID and Client
 Secret, which can make it a little difficult to know when to use which one.
 Thankfully, this Python client takes care of all of that for you. 
 
