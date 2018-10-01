@@ -21,14 +21,47 @@ python setup.py install
 ````
 
 
-## Example 
+## Authenticating 
+
+You will first need to [sign up for a Domain developer account](https://developer.domain.com.au/).
+Then you will be able to [create an application](https://developer.domain.com.au/applications) and get a Client ID and Client Secret. 
+These will be used for authentication.
+
+Note that the Domain API has multiple Packages and Plans that give access to
+different end points of their API. You can sign up for the 
+"Agents and Listings - Innovation Plan" and the
+"Property and Location - Innovation Plan" for free.
+Each package/plan combination will grant you a different Client ID and Client
+Secret, which can make it a little difficult to know when to use which one.
+Thankfully, this Python client takes care of all of that for you. 
+
+Enter your credentials into a file (e.g. called client_credentials.yaml) in the
+following format:
+
+````yaml
+- client_id: <AGENTS_AND_LISTINGS_ID>
+  client_secret: <AGENTS_AND_LISTINGS_SECRET>
+  package_and_plan: AgentsAndListingsInnovationPlan 
+- client_id: <PROPERTY_AND_INNOVATION_ID>
+  client_secret: <PROPERTY_AND_INNOVATION_SECRET>
+  package_and_plan: PropertyAndLocationInnovationPlan
+````
+
+
+Now you can use those credentials (or any number of Client ID/Client Secret pairs)
+to authenticate and use the API from Python:
 
 ````python
 from domain import DomainClient
 
-domain = DomainClient()
+dc = DomainClient("client_credentials.yaml")
+````
 
-# Search for properties.
+## API Example.
+
+
+````python
+# Suggest properties based on search terms
 results = domain.properties_suggest("Mockingbird lane")
 
 print(results[0])
@@ -45,13 +78,13 @@ print(results[0])
  u'address': u'145 Mockingbird Road, Pheasants Nest NSW 2574'}
 
 
-# General sales metadata
+# General sales metadata.
 print(domain.sales_results_metadata())
 >>> {u'auctionedDate': u'2017-08-12',
  u'lastModifiedDateTime': u'2017-08-12T08:45:37.576Z'}
 
 
-# Check recent sales results in the best city ever
+# Check recent sales results in the best city ever.
 print(domain.sales_results("Melbourne"))
 >>> {u'adjClearanceRate': 0.717219589257504,
  u'median': 898000,
