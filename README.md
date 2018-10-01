@@ -57,6 +57,16 @@ from domain import DomainClient
 dc = DomainClient("client_credentials.yaml")
 ````
 
+That's it! The `DomainClient` will work out which scope is required for each API
+end point, and will create authentication tokens (Oauth2) as needed. New tokens
+will be generated when the old ones expire, and the token handling
+(`domain.authorisations.token.Token`) will automatically throttle your requests
+so that you your queries don't fail due to the Domain API rate limits.
+
+You can override this behaviour by supplying your own `token=Token` keyword 
+argument to any API method in the `DomainClient` class.
+
+
 ## API Example.
 
 
