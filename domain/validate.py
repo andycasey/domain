@@ -1,6 +1,24 @@
 # -*- coding: utf-8 -*-
 
 
+def case_insensitive_string(string, available, default=None):
+
+    if string is None:
+        return default
+
+    _available = [each.lower() for each in available]
+
+    try:
+        index = _available.index(f"{string}".lower())
+
+    except ValueError:
+        raise ValueError(f"unrecognised input ('{string}') - must be in {available}")
+
+    else:
+        return available[index]
+
+
+
 def listing_type(entry):
     if entry is None:
         return ""
@@ -90,6 +108,11 @@ def integer_range(entry, default_value=-1):
         raise ValueError("only lower and upper range can be given, not a list")
 
     return tuple(sorted(entry))
+
+
+def city(string, **kwargs):
+    cities = ("Sydney", "Melbourne", "Brisbane", "Adelaide", "Canberra")
+    return case_insensitive_string(string, cities, **kwargs)
 
 
 def advertiser_ids(entries):

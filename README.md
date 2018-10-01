@@ -5,7 +5,7 @@
 
 Don't ask.
 
-## API client example
+## Domain API client example
 
 ````python
 from domain import DomainClient
@@ -46,3 +46,6 @@ print(domain.sales_results("melb"))
  u'numberWithdrawn': 10,
  u'totalSales': 412839650.0}
  ````
+
+
+## CoreLogic API
