@@ -31,7 +31,7 @@ setup(
         "Programming Language :: Python :: 3.6",
     ],
     keywords="domain property api client",
-    packages=["domain"],
+    packages=["domain", "domain.authorisation"],
     install_requires=["requests", "pyyaml"],
     extras_require={
         "test": ["coverage"]
