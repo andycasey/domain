@@ -16,11 +16,11 @@ def read(filename):
     return contents
 
 # Get the version information.
-import domain
+from domain import  __version__
 
 setup(
     name="domain",
-    version=domain.__version__,
+    version=__version__,
     author="Andrew R. Casey",
     author_email="andycasey@gmail.com",
     description="Python client for the Domain property API",
@@ -32,7 +32,7 @@ setup(
     ],
     keywords="domain property api client",
     packages=["domain"],
-    install_requires=["requests"],
+    install_requires=["requests", "pyyaml"],
     extras_require={
         "test": ["coverage"]
     },
