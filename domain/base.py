@@ -18,7 +18,7 @@ class BaseDomainClient(object):
 
         # Load the credentials.
         with open(credentials_path, "r") as fp:
-            contents = yaml.load(fp)
+            contents = yaml.load(fp, Loader=yaml.FullLoader)
 
         self._credentials = [ClientCredentials(self, **ea) for ea in contents]
 

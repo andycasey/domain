@@ -25,28 +25,22 @@ python setup.py install
 # Authentication 
 
 You will first need to [sign up for a Domain developer account](https://developer.domain.com.au/).
-Then you will be able to [create an application](https://developer.domain.com.au/applications) and get a Client ID and Client Secret. 
-These will be used for authentication.
+Then you will be able to [create a project](https://developer.domain.com.au/projects).
 
-Note that the Domain API has multiple [Packages and Plans](https://developer.domain.com.au/docs/packages-and-plans) 
-that give access to different end points of their API. You can sign up for the following packages and plans for free:
+Now you will need to create some credentials. I suggest to create an OAuth 2.0 Client. To do this correctly you will be given a Client ID and Client Secret. Copy those down; you'll need these later.
 
-- Agents and Listings - Innovation Plan
-- Property and Location - Innovation Plan 
+### Note
+The Domain API has changed since this code was written. That means some of the way this code works to find out which credentials are required for a given API end point, are no longer needed. This README just tells you what you need to do to make everything work. In practice, the abstraction of plan <-> scope needs to be updated to reflect the new API end points.
 
-Each package/plan combination will grant you a different Client ID and Client
-Secret, which can make it a little difficult to know when to use which one.
-Thankfully, this Python client takes care of all of that for you. 
 
-Enter your credentials into a file (e.g. called client_credentials.yaml) in the
-following format:
-
+Next you'll need to add API Access to your project. Sign up for everything that is free, and then create a credentials file (called `client_credentials.yaml`) in the following format:
+ 
 ````yaml
-- client_id: <AGENTS_AND_LISTINGS_ID>
-  client_secret: <AGENTS_AND_LISTINGS_SECRET>
+- client_id: <CLIENT_ID>
+  client_secret: <CLIENT_SECRET>
   package_and_plan: AgentsAndListingsInnovationPlan 
-- client_id: <PROPERTY_AND_INNOVATION_ID>
-  client_secret: <PROPERTY_AND_INNOVATION_SECRET>
+- client_id: <CLIENT_ID>
+  client_secret: <CLIENT_SECRET>
   package_and_plan: PropertyAndLocationInnovationPlan
 ````
 
@@ -55,7 +49,7 @@ Now you can use those credentials (or any number of Client ID/Client Secret pair
 to authenticate and use the API from Python:
 
 ````python
-from domain import DomainClient
+from domain.client import DomainClient
 
 dc = DomainClient("client_credentials.yaml")
 ````

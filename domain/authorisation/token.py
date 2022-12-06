@@ -5,13 +5,13 @@ from time import (sleep, time) # yea it is
 
 class Token(object):
 
-    def __init__(self, access_token, scopes, expires_in, token_type="Bearer",
+    def __init__(self, access_token, scope, expires_in, token_type="Bearer",
                  throttle_rate=2):
 
         self.access_token = access_token
         self.token_type = token_type
         self.expires = time() + expires_in
-        self.scopes = scopes
+        self.scope = tuple(scope.split(" "))
 
         # Automagically handle throttling.
         self._api_call_times = deque()
@@ -27,10 +27,10 @@ class Token(object):
         return f"{self.token_type} {self.access_token}"
 
     def has_scope(self, scope):
-        return scope in self.scopes
+        return scope in self.scope
 
     def has_any_scope(self, scopes):
-        return len(set(scopes).intersection(self.scopes)) > 0
+        return len(set(scopes).intersection(self.scope)) > 0
 
 
     @property

@@ -29,22 +29,22 @@ class AuthorisationGrant(object):
         return self._token
 
 
-    def create_token(self, scopes=None):
+    def create_token(self, scope=None):
 
-        if scopes is None:
-            scopes = package_plan_scopes[self.package_and_plan]
+        if scope is None:
+            scope = " ".join(package_plan_scopes[self.package_and_plan])
 
         r = requests.post(
             self.client._auth_uri("connect/token"),
             auth=self._auth,
             data=dict(
                 grant_type="client_credentials",
-                scope=" ".join(scopes)))
+                scope=scope))
 
         if not r.ok:
             r.raise_for_status()
 
-        kwds = dict(scopes=scopes)
+        kwds = dict(scope=scope)
         kwds.update(r.json())
 
         return Token(**kwds)
