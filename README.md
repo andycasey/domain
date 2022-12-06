@@ -29,8 +29,7 @@ Then you will be able to [create a project](https://developer.domain.com.au/proj
 
 Now you will need to create some credentials. I suggest to create an OAuth 2.0 Client. To do this correctly you will be given a Client ID and Client Secret. Copy those down; you'll need these later.
 
-### Note
-The Domain API has changed since this code was written. That means some of the way this code works to find out which credentials are required for a given API end point, are no longer needed. This README just tells you what you need to do to make everything work. In practice, the abstraction of plan <-> scope needs to be updated to reflect the new API end points.
+*The Domain API has changed since this code was written. That means some of the way this code works to find out which credentials are required for a given API end point, are no longer needed. This README just tells you what you need to do to make everything work. In practice, the abstraction of plan <-> scope needs to be updated to reflect the new API end points.*
 
 
 Next you'll need to add API Access to your project. Sign up for everything that is free, and then create a credentials file (called `client_credentials.yaml`) in the following format:
